@@ -12,42 +12,6 @@
     "coverage": "vitest run --coverage",
     "precommit": "lint-staged"
   },
-  "eslintConfig": {
-    "env": {
-      "browser": true,
-      "node": true
-    },
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2020,
-      "sourceType": "module"
-    },
-    "ignorePatterns": [
-      "vite.config.js",
-      "*.d.ts",
-      "dist/",
-      "__mocks__"
-    ],
-    "rules": {
-      "@typescript-eslint/no-empty-function": 0,
-      "@typescript-eslint/ban-ts-comment": 1,
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_|^h"
-        }
-      ]
-    },
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:prettier/recommended"
-    ],
-    "plugins": [
-      "prettier",
-      "@typescript-eslint"
-    ]
-  },
   "prettier": {
     "semi": true,
     "singleQuote": true,
