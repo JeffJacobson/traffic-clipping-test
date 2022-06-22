@@ -1,23 +1,27 @@
 import { expect, describe, it, vi } from 'vitest';
 import { initWidgets } from './widgets';
 
-vi.mock('@arcgis/core/widgets/LayerList', () => {
+vi.mock("@arcgis/core/views/MapView", () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-vi.mock('@arcgis/core/widgets/Legend', () => {
+vi.mock("@arcgis/core/widgets/Home", () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-vi.mock('@arcgis/core/widgets/Search', () => {
+vi.mock("@arcgis/core/widgets/Search", () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-
-vi.mock('@arcgis/core/widgets/Search/LayerSearchSource', () => {
+vi.mock("@arcgis/core/widgets/Locate", () => {
+  return {
+    default: vi.fn(() => ({})),
+  };
+});
+vi.mock("@arcgis/core/geometry/Extent", () => {
   return {
     default: vi.fn(() => ({})),
   };
@@ -35,9 +39,7 @@ describe('widgets', () => {
       },
     };
 
-    const layer: any = {};
-
-    initWidgets({ view, layer });
-    expect(widgets).toHaveLength(2);
+    initWidgets({ view });
+    expect(widgets).toHaveLength(3);
   });
 });
