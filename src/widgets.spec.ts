@@ -1,27 +1,27 @@
 import { expect, describe, it, vi } from 'vitest';
 import { initWidgets } from './widgets';
 
-vi.mock("@arcgis/core/views/MapView", () => {
+vi.mock('@arcgis/core/views/MapView', () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-vi.mock("@arcgis/core/widgets/Home", () => {
+vi.mock('@arcgis/core/widgets/Home', () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-vi.mock("@arcgis/core/widgets/Search", () => {
+vi.mock('@arcgis/core/widgets/Search', () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-vi.mock("@arcgis/core/widgets/Locate", () => {
+vi.mock('@arcgis/core/widgets/Locate', () => {
   return {
     default: vi.fn(() => ({})),
   };
 });
-vi.mock("@arcgis/core/geometry/Extent", () => {
+vi.mock('@arcgis/core/geometry/Extent', () => {
   return {
     default: vi.fn(() => ({})),
   };
