@@ -7,12 +7,12 @@ import Polygon from '@arcgis/core/geometry/Polygon';
 import { initWidgets } from './widgets';
 import { getClosures } from './closures';
 import { waExtentWebMercator } from './WAExtent';
-import CustomParameters, {createClippingCustomParams} from './CustomParameters';
+import CustomParameters, { createClippingCustomParams } from './CustomParameters';
 
 config.apiKey = import.meta.env.VITE_API_KEY as string;
 
 var map = new EsriMap({
-  basemap: 'streets-navigation-vector',
+  basemap: 'dark-gray-vector',
 });
 
 var view = new MapView({
@@ -24,15 +24,34 @@ var view = new MapView({
   },
 });
 
+const trafficUrl = 'https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer';
+const trafficRefreshIntervalInMinutes = 5;
+const trafficLayer = new MapImageLayer({
+  url: trafficUrl,
+  id: "Traffic",
+  sublayers: [{ id: 6 }],
+  refreshInterval: trafficRefreshIntervalInMinutes,
+});
+
+trafficLayer.on("refresh", (event) => {
+  console.group("traffic layer refresh handler");
+  console.debug("event", event);
+  console.groupEnd();
+});
+
+trafficLayer.watch("customParameters", (newValue: CustomParameters, oldValue: CustomParameters, propertyName, target) => {
+  console.log("traffic layer customParameters changed", {
+    oldValue,
+    newValue,
+    propertyName,
+    target
+  })
+})
+
 
 async function setupClosureMasking() {
-  const trafficUrl = 'https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer';
-  const trafficRefreshIntervalInMinutes = 5;
-  const trafficLayer = new MapImageLayer({
-    url: trafficUrl,
-    sublayers: [{ id: 6 }],
-    refreshInterval: trafficRefreshIntervalInMinutes,
-  });
+  console.debug(`entering setupClosureMasking (${setupClosureMasking.name})`);
+
 
   let closureMap: Map<number, Polygon>;
 
@@ -52,7 +71,7 @@ async function setupClosureMasking() {
     } else {
       const clipPolygon = closureMap.get(zoomLevel);
       const customParameters = createClippingCustomParams(clipPolygon || null);
-      trafficLayer.customParameters = customParameters;
+      trafficLayer.set("customParameters", customParameters ? JSON.stringify(customParameters) : null);
     }
     trafficLayer.refresh();
   }
@@ -67,18 +86,32 @@ async function setupClosureMasking() {
     }
   );
 
+  console.debug("zoomWatchHandle", zoomWatchHandle);
+
+  const closureRefreshIntervalInMilliseconds = trafficRefreshIntervalInMinutes * 60 * 1000;
   // Setup periodic retrieval of closure features.
-  const closureRefeshIntervalId = setTimeout(async () => {
+  const closureRefreshIntervalId = setTimeout(async () => {
     closureMap = await getClosures();
-  }, trafficRefreshIntervalInMinutes * 60 * 1000);
+  }, closureRefreshIntervalInMilliseconds);
+
+  console.debug("closure refresh timeout created", {
+    closureRefreshIntervalId,
+    trafficRefreshIntervalInMinutes,
+    refreshIntervalInMilliseconds: closureRefreshIntervalInMilliseconds
+  });
+  console.debug(`exiting setupClosureMasking (${setupClosureMasking.name})`);
 }
 
 view.when(() => {
-  setupClosureMasking();
   initWidgets({ view });
 });
 
+trafficLayer.when(() => {
+  if (trafficLayer.isFulfilled()) {
+    setupClosureMasking();
+  }
+}, (error: Error) => {
+  console.error("an error occurred with the traffic layer", error);
+})
 
-setupClosureMasking();
-
-
+map.add(trafficLayer);

@@ -3,6 +3,8 @@ import MapView from '@arcgis/core/views/MapView';
 import Home from '@arcgis/core/widgets/Home';
 import Search from '@arcgis/core/widgets/Search';
 import Locate from '@arcgis/core/widgets/Locate';
+import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
+import Expand from "@arcgis/core/widgets/Expand";
 import { waExtentGeographic } from './WAExtent';
 
 interface Params {
@@ -34,5 +36,18 @@ export function initWidgets({ view }: Params): MapView {
 
   const locate = new Locate({ view: view });
   view.ui.add(locate, 'top-left');
+
+
+
+
+  view.when((() => {
+    const basemapGallery = new BasemapGallery({
+      view
+    });
+    const bmExpand = new Expand({
+      content: basemapGallery
+    });
+    view.ui.add(bmExpand, "top-left");
+  }))
   return view;
 }
