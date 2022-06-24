@@ -1,0 +1,6 @@
+# Custom Dictionary Words
+unioned
+xmax
+xmin
+ymax
+ymin
