@@ -7,9 +7,14 @@ import Polygon from '@arcgis/core/geometry/Polygon';
 import { initWidgets } from './widgets';
 import { getClosures } from './closures';
 import { waExtentWebMercator } from './WAExtent';
-import CustomParameters, { createClippingCustomParams } from './CustomParameters';
+import { createClippingCustomParams } from './CustomParameters';
+import type { InterceptBefore } from "./interceptor"
 
 config.apiKey = import.meta.env.VITE_API_KEY as string;
+
+let closureMap: Map<number, Polygon>;
+
+const trafficUrl = 'https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer';
 
 var map = new EsriMap({
   basemap: 'dark-gray-vector',
@@ -24,7 +29,32 @@ var view = new MapView({
   },
 });
 
-const trafficUrl = 'https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer';
+// Intercept the traffic service and add clipping polygon.
+// See https://developers.arcgis.com/javascript/latest/api-reference/esri-config.html#request
+config.request.interceptors?.push({
+  urls: trafficUrl,
+  before: function (params: InterceptBefore) {
+    console.debug("traffic request interceptor before", params);
+    if (closureMap && view.ready) {
+      const clippingPolygon = closureMap.get(view.zoom) || null;
+        const clipping = createClippingCustomParams(clippingPolygon);
+        params.requestOptions.query.clipping = JSON.stringify(clipping);
+    }
+  },
+  // use the AfterInterceptorCallback to check if `ssl` is set to 'true'
+  // on the response to the request, if it's set to 'false', change
+  // the value to 'true' before returning the response
+  after: function (response: __esri.RequestResponse) {
+    console.debug("traffic request interceptor after", response)
+    if (!response.ssl) {
+      response.ssl = true;
+    }
+  }
+})
+
+
+
+
 const trafficRefreshIntervalInMinutes = 5;
 const trafficLayer = new MapImageLayer({
   url: trafficUrl,
@@ -33,60 +63,18 @@ const trafficLayer = new MapImageLayer({
   refreshInterval: trafficRefreshIntervalInMinutes,
 });
 
-trafficLayer.on("refresh", (event) => {
-  console.group("traffic layer refresh handler");
-  console.debug("event", event);
-  console.groupEnd();
-});
-
-trafficLayer.watch("customParameters", (newValue: CustomParameters, oldValue: CustomParameters, propertyName, target) => {
-  console.log("traffic layer customParameters changed", {
-    oldValue,
-    newValue,
-    propertyName,
-    target
-  })
-})
-
 
 async function setupClosureMasking() {
   console.debug(`entering setupClosureMasking (${setupClosureMasking.name})`);
 
 
-  let closureMap: Map<number, Polygon>;
 
   getClosures().then((maskMap) => {
     if (!maskMap) {
       throw new TypeError("maskMap should not be null or undefined", maskMap);
     }
     closureMap = maskMap;
-    setTrafficLayerClippingParameters(view.zoom);
-    map.add(trafficLayer);
   }, error => console.error("Failed to get closure info", error));
-
-  function setTrafficLayerClippingParameters(zoomLevel: number) {
-    if (!closureMap) {
-      console.error("closureMap should not be null or undefined", closureMap);
-      trafficLayer.customParameters = undefined;
-    } else {
-      const clipPolygon = closureMap.get(zoomLevel);
-      const customParameters = createClippingCustomParams(clipPolygon || null);
-      trafficLayer.set("customParameters", customParameters ? JSON.stringify(customParameters) : null);
-    }
-    trafficLayer.refresh();
-  }
-
-  const zoomWatchHandle = view.watch(
-    'zoom',
-    (newValue: number, oldValue: number, _propertyName, _target) => {
-      if (oldValue === newValue) {
-        return;
-      }
-      setTrafficLayerClippingParameters(newValue);
-    }
-  );
-
-  console.debug("zoomWatchHandle", zoomWatchHandle);
 
   const closureRefreshIntervalInMilliseconds = trafficRefreshIntervalInMinutes * 60 * 1000;
   // Setup periodic retrieval of closure features.

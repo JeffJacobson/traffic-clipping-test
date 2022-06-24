@@ -20,7 +20,7 @@ export async function getFeatureSet(url: string = closureUrl) {
  * @yields An object with a { polyline: Polyline, latestDate: number (an integer) }
  */
 function* enumerateFeatures(featureSet: FeatureSet) {
-  console.groupCollapsed("enumerating features");
+  // console.groupCollapsed("enumerating features");
   let latestDate = 0;
   for (const feature of featureSet.features) {
     const polyline = feature.geometry as Polyline;
@@ -31,53 +31,53 @@ function* enumerateFeatures(featureSet: FeatureSet) {
     }
     yield { polyline, latestDate };
   }
-  console.groupEnd();
+  // console.groupEnd();
 }
 
-function* testRings(polygon: Polygon) {
-  const clockwiseRings = new Array<number>();
-  const counterClockwiseRings = new Array<number>();
-  for (const [index, ring] of polygon.rings.entries()) {
-    const isClockwise = polygon.isClockwise(ring);
-    if (isClockwise) {
-      clockwiseRings.push(index);
-    } else {
-      counterClockwiseRings.push(index);
-    }
-    yield {
-      index, 
-      isClockwise, 
-      isSelfIntersecting: polygon.isSelfIntersecting
-    };
-  }
-  return {clockwiseRings, counterClockwiseRings};
-}
+// function* testRings(polygon: Polygon) {
+//   const clockwiseRings = new Array<number>();
+//   const counterClockwiseRings = new Array<number>();
+//   for (const [index, ring] of polygon.rings.entries()) {
+//     const isClockwise = polygon.isClockwise(ring);
+//     if (isClockwise) {
+//       clockwiseRings.push(index);
+//     } else {
+//       counterClockwiseRings.push(index);
+//     }
+//     yield {
+//       index, 
+//       isClockwise, 
+//       isSelfIntersecting: polygon.isSelfIntersecting
+//     };
+//   }
+//   return {clockwiseRings, counterClockwiseRings};
+// }
 
 async function getClippingMask(bufferSize: number, closureLineGeometries: Polyline[]) {
-  console.group("getClippingMask");
+  // console.group("getClippingMask");
   let bufferPolygon: Polygon | Polygon[] = await geodesicBuffer(closureLineGeometries, bufferSize, 'feet', true);
-  console.debug("buffered polygon", Array.isArray(bufferPolygon) ? bufferPolygon.map(p => p.toJSON()) : bufferPolygon.toJSON());
+  // console.debug("buffered polygon", Array.isArray(bufferPolygon) ? bufferPolygon.map(p => p.toJSON()) : bufferPolygon.toJSON());
   let unionedGeometry: Polygon;
   // Convert geometry array to single geometry.
   if (Array.isArray(bufferPolygon)) {
     // If the array only has a single element, just use that one.
     // Otherwise, union the geometry.
     unionedGeometry = (bufferPolygon.length === 1 ? bufferPolygon[0] : await union(bufferPolygon)) as Polygon;
-    console.debug("buffer operation returned an array. Union result", unionedGeometry.toJSON());
+    // console.debug("buffer operation returned an array. Union result", unionedGeometry.toJSON());
   } else {
     // Already is a single geometry; just assign as is.
     unionedGeometry = bufferPolygon;
-    console.debug("buffer geometry was not an array");
+    // console.debug("buffer geometry was not an array");
   }
   // Simplify the geometry.
   const simplifiedGeometry = await simplify(unionedGeometry) as Polygon;
-  console.debug("simplified geometry", simplifiedGeometry);
+  // console.debug("simplified geometry", simplifiedGeometry);
 
   const output = Polygon.fromExtent(waExtentWebMercator);
-  console.debug("converted WA extent to polygon", { waExtentWebMercator, "as Polygon": output })
+  // console.debug("converted WA extent to polygon", { waExtentWebMercator, "as Polygon": output })
   // output.rings?.push(...simplifiedGeometry.rings);
   simplifiedGeometry.rings.forEach(r => output.addRing(r));
-  console.debug("added rings to output", output.toJSON());
+  // console.debug("added rings to output", output.toJSON());
   // const containingRings =
   //   [[
   //     [-13931998.871850241, 6307186.773851644],
@@ -88,12 +88,12 @@ async function getClippingMask(bufferSize: number, closureLineGeometries: Polyli
   //   ]];
   // output.rings = containingRings.concat(simplifiedGeometry.rings)
 
-  console.group("testing rings");
-  for (const result of testRings(output)) {
-    console.debug(`ring ${result.index}`, result)
-  }
-  console.groupEnd();
-  console.groupEnd();
+  // console.group("testing rings");
+  // for (const result of testRings(output)) {
+  //   console.debug(`ring ${result.index}`, result)
+  // }
+  // console.groupEnd();
+  // console.groupEnd();
   return output;
 }
 

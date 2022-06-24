@@ -26,11 +26,6 @@ export interface Clipping {
     excludedLayers?: number[];
 }
 
-export type CustomParameters = {
-    [key: string]: any;
-    clipping?: string;
-};
-
 function objectHasAllProperties(o: object, ...properties: string[]) {
     for (const propertyName of properties) {
         if (!o.hasOwnProperty(propertyName)) {
@@ -67,31 +62,17 @@ function getEsriGeometryType(geometry: PlainGeometryObject | Geometry): esriGeom
 
 type ClippingGeometry = Polygon | Extent
 
-export function createClippingCustomParams(geometry: ClippingGeometry | null, excludedLayers?: number[]): CustomParameters | null {
-    console.group(`Entering "${createClippingCustomParams.name}"`);
-    console.debug("parameters", {
-        "Clipping Geometry": geometry,
-        "Clipping Geometry as JSON": geometry?.toJSON(),
-        "Excluded Layers": excludedLayers
-    });
-    let output: CustomParameters | null = null;
+export function createClippingCustomParams(geometry: ClippingGeometry | null, excludedLayers?: number[]): Clipping | null {
+    let clipping: Clipping | null = null;
     if (geometry) {
         const geometryType = getEsriGeometryType(geometry);
-        let clipping: Clipping = {
+        clipping = {
             geometryType: geometryType as validClippingGeometryType,
             geometry: geometry.toJSON(),
         };
         if (excludedLayers) {
             clipping.excludedLayers = excludedLayers;
         }
-        output = {
-            clipping: JSON.stringify(clipping)
-        }
-       
     }
-    console.debug("output customParameters", output);
-    console.groupEnd();
-    return output;
+    return clipping;
 }
-
-export default CustomParameters;
