@@ -69,17 +69,23 @@ async function setupClosureMasking() {
 
 
 
-  getClosures().then((maskMap) => {
-    if (!maskMap) {
-      throw new TypeError("maskMap should not be null or undefined", maskMap);
+  getClosures().then((closuresResponse) => {
+    if (!closuresResponse) {
+      throw new TypeError("closuresResponse should not be null or undefined", closuresResponse);
     }
-    closureMap = maskMap;
+    if (!closuresResponse.hasChanged) {
+      return;
+    }
+    closureMap = closuresResponse.mapping;
   }, error => console.error("Failed to get closure info", error));
 
   const closureRefreshIntervalInMilliseconds = trafficRefreshIntervalInMinutes * 60 * 1000;
   // Setup periodic retrieval of closure features.
   const closureRefreshIntervalId = setTimeout(async () => {
-    closureMap = await getClosures();
+    const closuresResponse = await getClosures();
+    if (closuresResponse.hasChanged) {
+      closureMap = closuresResponse.mapping;
+    }
   }, closureRefreshIntervalInMilliseconds);
 
   console.debug("closure refresh timeout created", {
