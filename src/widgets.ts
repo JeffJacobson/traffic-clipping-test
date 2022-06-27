@@ -68,7 +68,8 @@ export function initWidgets({ view }: Params): MapView {
     });
 
     const llExpand = new Expand({
-      content: layerList
+      content: layerList,
+      expanded: true
     })
 
     view.ui.add(llExpand, "top-right");

@@ -40,6 +40,6 @@ describe('widgets', () => {
     };
 
     initWidgets({ view });
-    expect(widgets).toHaveLength(3);
+    expect(widgets).toHaveLength(4);
   });
 });

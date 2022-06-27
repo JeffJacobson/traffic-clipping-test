@@ -106,19 +106,23 @@ async function getClippingMask(bufferSize: number, closureLineGeometries: Polyli
   const simplifiedGeometry = await simplify(unionedGeometry) as Polygon;
   // console.debug("simplified geometry", simplifiedGeometry);
 
-  const output = Polygon.fromExtent(waExtentWebMercator);
+  // const output = Polygon.fromExtent(waExtentWebMercator);
   // console.debug("converted WA extent to polygon", { waExtentWebMercator, "as Polygon": output })
   // output.rings?.push(...simplifiedGeometry.rings);
-  simplifiedGeometry.rings.forEach(r => output.addRing(r));
+  // simplifiedGeometry.rings.forEach(r => output.addRing(r));
   // console.debug("added rings to output", output.toJSON());
-  // const containingRings =
-  //   [[
-  //     [-13931998.871850241, 6307186.773851644],
-  //     [-12987205.690744698, 6307186.773851644],
-  //     [-12987205.690744698, 5700000.603400948],
-  //     [-13931998.871850241, 5700000.603400948],
-  //     [-13931998.871850241, 6307186.773851644]
-  //   ]];
+  const containingRings =
+    [[
+      [-13931998.871850241, 6307186.773851644],
+      [-12987205.690744698, 6307186.773851644],
+      [-12987205.690744698, 5700000.603400948],
+      [-13931998.871850241, 5700000.603400948],
+      [-13931998.871850241, 6307186.773851644]
+    ]].concat(simplifiedGeometry.rings);
+  const output = new Polygon({
+    rings: containingRings,
+    spatialReference: simplifiedGeometry.spatialReference
+  });
   // output.rings = containingRings.concat(simplifiedGeometry.rings)
 
   // console.group("testing rings");
