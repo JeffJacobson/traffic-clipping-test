@@ -9,6 +9,7 @@ import Search from '@arcgis/core/widgets/Search';
 import Locate from '@arcgis/core/widgets/Locate';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
+import LayerList from "@arcgis/core/widgets/LayerList";
 import { waExtentGeographic } from './WAExtent';
 
 /**
@@ -61,6 +62,16 @@ export function initWidgets({ view }: Params): MapView {
       content: basemapGallery
     });
     view.ui.add(bmExpand, "top-left");
+
+    const layerList = new LayerList({
+      view
+    });
+
+    const llExpand = new Expand({
+      content: layerList
+    })
+
+    view.ui.add(llExpand, "top-right");
   }))
   return view;
 }
