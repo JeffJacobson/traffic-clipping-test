@@ -7,7 +7,7 @@ import Polygon from '@arcgis/core/geometry/Polygon';
 import { initWidgets } from './widgets';
 import { getClosures } from './closures';
 import { waExtentWebMercator } from './WAExtent';
-import { createClippingCustomParams } from './CustomParameters';
+import { createClippingParameter } from './CustomParameters';
 import type { InterceptBefore } from "./interceptor"
 
 config.apiKey = import.meta.env.VITE_API_KEY as string;
@@ -37,7 +37,7 @@ config.request.interceptors?.push({
     console.debug("traffic request interceptor before", params);
     if (closureMap && view.ready) {
       const clippingPolygon = closureMap.get(view.zoom) || null;
-        const clipping = createClippingCustomParams(clippingPolygon);
+        const clipping = createClippingParameter(clippingPolygon);
         params.requestOptions.query.clipping = JSON.stringify(clipping);
     }
   },

@@ -20,12 +20,21 @@ const typeNameMapping = new Map<geometryObjectTypeName, esriGeometryType>(
     ]
 );
 
+/**
+ * Represents map service export "clipping" parameter.
+ */
 export interface Clipping {
     geometryType: validClippingGeometryType;
     geometry: PlainGeometryObject;
     excludedLayers?: number[];
 }
 
+/**
+ * Checks an object to see if it has all of the given named properties.
+ * @param o An object
+ * @param properties Property names
+ * @returns Returns true if the object has ALL of the named properties, false otherwise.
+ */
 function objectHasAllProperties(o: object, ...properties: string[]) {
     for (const propertyName of properties) {
         if (!o.hasOwnProperty(propertyName)) {
@@ -35,6 +44,12 @@ function objectHasAllProperties(o: object, ...properties: string[]) {
     return true;
 }
 
+/**
+ * Gets the "esriGeometry____" geometry type name from a geometry object
+ * by examining its properties.
+ * @param geometry A geometry object
+ * @returns Returns the corresponding type name
+ */
 function getEsriGeometryType(geometry: PlainGeometryObject | Geometry): esriGeometryType {
     function createMessage(geometryObject: Geometry): string | undefined {
         return `Unsupported geometry type: ${geometryObject.type}`;
@@ -62,7 +77,14 @@ function getEsriGeometryType(geometry: PlainGeometryObject | Geometry): esriGeom
 
 type ClippingGeometry = Polygon | Extent
 
-export function createClippingCustomParams(geometry: ClippingGeometry | null, excludedLayers?: number[]): Clipping | null {
+
+/**
+ * Creates a clipping parameter from the input geometry.
+ * @param geometry 
+ * @param excludedLayers 
+ * @returns 
+ */
+export function createClippingParameter(geometry: ClippingGeometry | null, excludedLayers?: number[]): Clipping | null {
     let clipping: Clipping | null = null;
     if (geometry) {
         const geometryType = getEsriGeometryType(geometry);

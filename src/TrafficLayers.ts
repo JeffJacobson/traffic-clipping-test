@@ -1,3 +1,9 @@
+/**
+ * This module provides information about the ArcGIS
+ * Traffic service.
+ * @module
+ */
+
 /** Valid region names */
 export type RegionName =
   | 'North America'

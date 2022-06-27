@@ -1,3 +1,8 @@
+/**
+ * This module defines the zoom levels and corresponding buffer sizes
+ * @module
+ */
+
 interface ZoomLevelBufferMap {
   zoomLevel: number;
   bufferSize: number;
