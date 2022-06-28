@@ -1,6 +1,14 @@
-# ArcGIS API for JavaScript Template Application
+# ArcGIS Traffic Service Clipping Test
 
-## Usage
+The [ArcGIS Traffic service](https://developers.arcgis.com/rest/network/api-reference/traffic-service.htm) sometimes shows closed roads as "green", giving the impression that they are actually open.
+
+This project is a test of intercepting requests to this service and adding a ["clipping" parameter](https://developers.arcgis.com/rest/services-reference/enterprise/export-map.htm#GUID-E233561D-CB1B-4D12-9B48-1C672A4AA8FB) to hide the traffic service output in those locations.
+
+Below is the information from the Esri Template that was used to create this application.
+
+## ArcGIS API for JavaScript Template Application
+
+### Usage
 
 This application is written in [TypeScript](http://www.typescriptlang.org/) and utilizes the [`vite`](https://vitejs.dev/).
 
